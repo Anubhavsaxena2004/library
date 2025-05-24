@@ -16,13 +16,22 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api.views import BookViewSet
+from api.views import BookViewSet,IssuedBookViewSet,RegisterView,UserViewSet
 from django.contrib import admin
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet)
+router.register(r'issued', IssuedBookViewSet)
+router.register(r'users', UserViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/register/', RegisterView.as_view()),
+    path('api/token/', TokenObtainPairView.as_view()),
+    path('api/token/refresh/', TokenRefreshView.as_view()),
 ]
