@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics, permissions
 from .models import Book, IssuedBook
-from .serializers import BookSerializer, IssuedBookSerializer, RegisterSerializer
+from .serializers import BookSerializer, IssuedBookSerializer, RegisterSerializer, UserSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
@@ -22,22 +22,14 @@ class IssuedBookViewSet(viewsets.ModelViewSet):
     serializer_class = IssuedBookSerializer
     
     def create(self, request, *args, **kwargs):
-        try:
+        
             # Normal process
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
-        except IntegrityError:
-            # Agar foreign key error aaye toh
-            return Response(
-                {
-                    "error": "Database error",
-                    "details": "User ya book sahi se select karein"
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -62,3 +54,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.AllowAny()]
         return super().get_permissions()
+from rest_framework.permissions import AllowAny
+
+class UserListView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
